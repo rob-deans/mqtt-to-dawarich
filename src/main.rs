@@ -1,4 +1,4 @@
-use log::{debug, info, error};
+use log::{debug, error, info};
 use rumqttc::{Client, Event, Incoming, MqttOptions, QoS};
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -15,13 +15,18 @@ struct OwntracksPayload {
     #[serde(skip_serializing_if = "Option::is_none")]
     batt: Option<i32>,
     bs: u8,
-    cog: u8,
-    conn: String,
-    created_at: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    cog: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    conn: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    created_at: Option<i32>,
     lat: f64,
     lon: f64,
-    m: u8,
-    tid: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    m: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tid: Option<String>,
     tst: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     vac: Option<i32>,
@@ -57,10 +62,12 @@ fn main() {
         dawarich_base_url, dawarich_port, dawarich_api_key
     );
 
-    info!("Sending data to Dawarich at {}:{}", dawarich_base_url, dawarich_port);
+    info!(
+        "Sending data to Dawarich at {}:{}",
+        dawarich_base_url, dawarich_port
+    );
 
     let client = "mqtt2dawarich";
-
 
     let mut mqttoptions = MqttOptions::new(client, mqtt_url.clone(), mqtt_port.clone());
     mqttoptions.set_keep_alive(Duration::from_secs(mqtt_keep_alive));
@@ -68,21 +75,33 @@ fn main() {
 
     let (client, mut connection) = Client::new(mqttoptions.clone(), 10);
 
-    client.subscribe(mqtt_topic.clone(), QoS::AtMostOnce).unwrap();
-    info!("Listening to MQTT broker on {}:{} for topic {}", mqtt_url, mqtt_port, mqtt_topic);
+    client
+        .subscribe(mqtt_topic.clone(), QoS::AtMostOnce)
+        .expect("Unable to subscribe to the topic");
+    info!(
+        "Listening to MQTT broker on {}:{} for topic {}",
+        mqtt_url, mqtt_port, mqtt_topic
+    );
     let d_client = reqwest::blocking::Client::new();
 
     for notification in connection.iter() {
         match notification {
             Ok(notif) => match notif {
                 Event::Incoming(Incoming::Publish(package)) => {
-                    let op: OwntracksPayload = serde_json::from_slice(&package.payload).unwrap();
+                    match serde_json::from_slice::<OwntracksPayload>(&package.payload) {
+                        Ok(data) => {
+                            let response = d_client.post(&dawarich_endpoint).json(&data).send();
 
-                    let response = d_client.post(&dawarich_endpoint).json(&op).send();
+                            match response {
+                                Ok(resp) => debug!("Response: {resp:?}"),
+                                Err(err) => error!("Request failed with error: {err:?}"),
+                            }
+                        }
 
-                    match response {
-                        Ok(resp) => debug!("Response: {resp:?}"),
-                        Err(err) => error!("Request failed with error: {err:?}"),
+                        Err(err) => {
+                            error!("Something went wrong with deserialising the payload");
+                            error!("Error: {err}");
+                        }
                     }
                 }
                 _ => debug!("Ignoring non-payload message"),
