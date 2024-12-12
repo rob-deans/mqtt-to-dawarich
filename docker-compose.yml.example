@@ -1,0 +1,14 @@
+version: '3.5'
+services:
+  mqtt_to_dawarich:
+    image: mqtt-to-dawarich:latest
+    restart: always
+    environment:
+      RUST_LOG: info
+      MQTT_BROKER_URL: 192.168.1.10
+      MQTT_USERNAME: mymqttusername
+      MQTT_PASSWORD: hunter2
+      MQTT_TOPIC: owntracks
+      DAWARICH_BASE_URL: 192.168.1.10
+      DAWARICH_API_KEY: <APIKEY>
+
