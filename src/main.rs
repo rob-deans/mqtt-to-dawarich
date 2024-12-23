@@ -58,8 +58,8 @@ fn main() {
         .parse()
         .expect("DAWARICH_PORT must be a valid number");
     let dawarich_endpoint = format!(
-        "http://{}:{}/api/v1/owntracks/points?api_key={}",
-        dawarich_base_url, dawarich_port, dawarich_api_key
+        "http://{}:{}/api/v1/owntracks/points",
+        dawarich_base_url, dawarich_port
     );
 
     info!(
@@ -69,7 +69,7 @@ fn main() {
 
     let client = "mqtt2dawarich";
 
-    let mut mqttoptions = MqttOptions::new(client, mqtt_url.clone(), mqtt_port.clone());
+    let mut mqttoptions = MqttOptions::new(client, mqtt_url.clone(), mqtt_port);
     mqttoptions.set_keep_alive(Duration::from_secs(mqtt_keep_alive));
     mqttoptions.set_credentials(mqtt_username, mqtt_password);
 
@@ -90,7 +90,11 @@ fn main() {
                 Event::Incoming(Incoming::Publish(package)) => {
                     match serde_json::from_slice::<OwntracksPayload>(&package.payload) {
                         Ok(data) => {
-                            let response = d_client.post(&dawarich_endpoint).json(&data).send();
+                            let response = d_client
+                                .post(&dawarich_endpoint)
+                                .json(&data)
+                                .bearer_auth(&dawarich_api_key)
+                                .send();
 
                             match response {
                                 Ok(resp) => debug!("Response: {resp:?}"),
