@@ -9,6 +9,6 @@ RUN cargo build --release
 
 FROM scratch
 
-COPY --from=builder /app/target/armv7-unknown-linux-musleabihf/release/mqtt-to-dawarich /
+COPY --from=builder /app/target/release/mqtt-to-dawarich /
 
 CMD [ "./mqtt-to-dawarich" ]
