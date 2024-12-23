@@ -7,7 +7,9 @@ COPY ["Cargo.lock", "Cargo.toml", "/app/"]
 
 RUN cargo build --release
 
+RUN find /app/target -type f
 FROM scratch
+
 
 COPY --from=builder /app/target/release/mqtt-to-dawarich /
 
