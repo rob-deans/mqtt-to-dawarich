@@ -1,4 +1,4 @@
-FROM messense/rust-musl-cross:armv7-musleabihf AS builder
+FROM rust:1.83 AS builder
 
 WORKDIR /app
 
