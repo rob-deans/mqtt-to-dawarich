@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   mqtt_to_dawarich:
-    image: mqtt-to-dawarich:latest
+    image: ghcr.io/rob-deans/mqtt-to-dawarich:latest
     restart: always
     environment:
       RUST_LOG: info
