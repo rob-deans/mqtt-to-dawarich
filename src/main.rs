@@ -7,7 +7,8 @@ use std::time::Duration;
 #[derive(Debug, Serialize, Deserialize)]
 struct OwntracksPayload {
     _type: String,
-    _id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    _id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     acc: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
