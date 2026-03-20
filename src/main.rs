@@ -1,39 +1,10 @@
 use log::{debug, error, info};
+use models::owntracks;
 use rumqttc::{Client, Event, Incoming, MqttOptions, QoS};
-use serde::{Deserialize, Serialize};
 use std::env;
 use std::time::Duration;
 
-#[derive(Debug, Serialize, Deserialize)]
-struct OwntracksPayload {
-    _type: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    _id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    acc: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    alt: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    batt: Option<i32>,
-    bs: u8,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    cog: Option<u16>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    conn: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    created_at: Option<i32>,
-    lat: f64,
-    lon: f64,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    m: Option<u8>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    tid: Option<String>,
-    tst: i64,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    vac: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    vel: Option<i32>,
-}
+pub mod models;
 
 fn main() {
     env_logger::init();
@@ -68,13 +39,13 @@ fn main() {
         dawarich_base_url, dawarich_port
     );
 
-    let client = "mqtt2dawarich";
+    let client = "mqtt2dawarich-local";
 
     let mut mqttoptions = MqttOptions::new(client, mqtt_url.clone(), mqtt_port);
     mqttoptions.set_keep_alive(Duration::from_secs(mqtt_keep_alive));
     mqttoptions.set_credentials(mqtt_username, mqtt_password);
 
-    let (client, mut connection) = Client::new(mqttoptions.clone(), 10);
+    let (client, mut connection) = Client::new(mqttoptions, 10);
 
     client
         .subscribe(mqtt_topic.clone(), QoS::AtMostOnce)
@@ -89,8 +60,15 @@ fn main() {
         match notification {
             Ok(notif) => match notif {
                 Event::Incoming(Incoming::Publish(package)) => {
-                    match serde_json::from_slice::<OwntracksPayload>(&package.payload) {
+                    match serde_json::from_slice::<owntracks::OwntracksPayload>(&package.payload) {
                         Ok(data) => {
+                            if data._type != "location" {
+                                debug!(
+                                    "Ignoring non-location payload type. Payload was: {:?}",
+                                    data._type
+                                );
+                                continue;
+                            }
                             let response = d_client
                                 .post(&dawarich_endpoint)
                                 .json(&data)
