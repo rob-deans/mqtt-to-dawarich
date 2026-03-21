@@ -4,15 +4,15 @@ use rumqttc::{Client, Event, Incoming, MqttOptions, QoS};
 use std::collections::VecDeque;
 use std::fs::OpenOptions;
 use std::io::{BufRead, BufReader, Write};
-use std::process::exit;
 use std::time::Duration;
 use std::{env, fs};
 
+use crate::models::buffer::Buffer;
+
 pub mod models;
 
-/*
-
-*/
+// Either a) always push to buffer then loop through
+// b) only push when failed
 
 // in-memory buffer if connection fails
 // checkpoint buffer i.e. append to an ndjson file
@@ -44,7 +44,6 @@ fn load_checkpoint(checkpoint_path: &String) -> Option<Vec<owntracks::OwntracksP
 
             Some(buffer)
         }
-        // No path -> ng to send over to dawarich -> skip
         // TODO: Should handle all errors
         Err(err) => match err.kind() {
             std::io::ErrorKind::NotFound => {
@@ -109,21 +108,23 @@ fn flush(checkpoint_path: &String, buffer: &VecDeque<owntracks::OwntracksPayload
 //     }
 // }
 
-fn main() -> Result<(), std::io::Error> {
+fn main() {
     env_logger::init();
 
     let checkpoint_path =
         env::var("CHECKPOINT_PATH").unwrap_or_else(|_| "checkpoint.ndjson".to_string());
+    // let buffer_size: usize = env::var("BUFFER_SIZE")
+    //     .unwrap_or_else(|_| "50".to_string())
+    //     .parse()
+    //     .expect("BUFFER_SIZE must be a valid number");
 
     let dawarich_config = dawarich::DawarichConfig::from_env();
 
-    let mut error_buffer: VecDeque<owntracks::OwntracksPayload> = VecDeque::from([]).into();
-    let d_client = reqwest::blocking::Client::new();
-    // let d_client = reqwest::blocking::Client::builder()
-    //     .timeout(std::time::Duration::from_secs(5))
-    //     .build()
-    //     .expect("msg");
+    let mut b = Buffer::new();
 
+    let d_client = reqwest::blocking::Client::new();
+
+    // TODO: Should this go to the buffer then handled in the normal flow?
     if let Some(data) = load_checkpoint(&checkpoint_path) {
         info!("Pushing {} point(s) to dawarich", data.len());
 
@@ -137,6 +138,10 @@ fn main() -> Result<(), std::io::Error> {
             // );
         }
         // On success truncate the file
+        debug!(
+            "Attempting to remove old checkpoint path at: {}",
+            &checkpoint_path
+        );
         match fs::remove_file(&checkpoint_path) {
             Ok(_) => {
                 info!("Successfully deleted checkpoint at: {}", &checkpoint_path)
@@ -171,94 +176,73 @@ fn main() -> Result<(), std::io::Error> {
 
     let (client, mut connection) = Client::new(mqttoptions, 10);
 
-    loop {
-        for notification in connection.iter() {
-            match notification {
-                Ok(Event::Incoming(Incoming::ConnAck(connack))) => {
-                    debug!(
-                        "ConnAck received. Attempting to subscribe to topic. {:?}",
-                        connack
-                    );
-                    info!(
-                        "Listening to MQTT broker on {}:{} for topic {}",
-                        mqtt_url, mqtt_port, mqtt_topic
-                    );
-                    if let Err(err) = client.subscribe(&mqtt_topic, QoS::AtMostOnce) {
-                        error!("Failed to resubscribe! {:?}", err);
-                    }
+    for notification in connection.iter() {
+        match notification {
+            Ok(Event::Incoming(Incoming::ConnAck(connack))) => {
+                debug!(
+                    "ConnAck received. Attempting to subscribe to topic. {:?}",
+                    connack
+                );
+                info!(
+                    "Listening to MQTT broker on {}:{} for topic {}",
+                    mqtt_url, mqtt_port, mqtt_topic
+                );
+                if let Err(err) = client.subscribe(&mqtt_topic, QoS::AtMostOnce) {
+                    error!("Failed to resubscribe! {:?}", err);
                 }
-                Ok(notif) => match notif {
-                    Event::Incoming(Incoming::Publish(package)) => {
-                        match serde_json::from_slice::<owntracks::OwntracksPayload>(
-                            &package.payload,
-                        ) {
-                            Ok(data) => {
-                                if data._type != "location" {
-                                    debug!(
-                                        "Ignoring non-location payload type. Payload was: {:?}",
-                                        data._type
-                                    );
-                                    continue;
-                                }
-                                // println!("{}", &error_buffer.len());
-                                let response = d_client
-                                    .post(dawarich_config.endpoint.clone())
-                                    .json(&data)
-                                    .bearer_auth(dawarich_config.api_key.clone())
-                                    .send();
+            }
+            Ok(notif) => match notif {
+                Event::Incoming(Incoming::Publish(package)) => {
+                    match serde_json::from_slice::<owntracks::OwntracksPayload>(&package.payload) {
+                        Ok(data) => {
+                            if data._type != "location" {
+                                debug!(
+                                    "Ignoring non-location payload type. Payload was: {:?}",
+                                    data._type
+                                );
+                                continue;
+                            }
 
-                                // if let Err(response) = request {
-                                //     error!("Request failed with error: {response:?}");
-                                //     error_buffer.push_back(data);
-                                //     // add to bufferf
-                                //     // TODO: Add config for this
-                                //     if error_buffer.len() > 1 {
-                                //         flush(&checkpoint_path, &error_buffer);
+                            b.enqueue(data.clone(), true);
+                            // buffer.push_back(data);
 
-                                //         error_buffer.clear();
-                                //     }
-                                // };
+                            for _ in 0..b.buffer.len() {
+                                if let Some(payload) = b.buffer.pop_front() {
+                                    let response = d_client
+                                        .post(dawarich_config.endpoint.clone())
+                                        .json(&payload)
+                                        .bearer_auth(dawarich_config.api_key.clone())
+                                        .send();
 
-                                match response {
-                                    Ok(resp) => {
-                                        debug!("Response: {resp:?}");
-                                        // i.e. when we re-connect
-                                        // if error_buffer.len() >= 1 {
-                                        //     // push all
-                                        //     for payload in error_buffer {
-                                        //         let response = d_client
-                                        //             .post(dawarich_config.endpoint.clone())
-                                        //             .json(&data)
-                                        //             .bearer_auth(dawarich_config.api_key.clone())
-                                        //             .send();
-                                        //     }
-                                        // }
-                                    }
-
-                                    Err(err) => {
-                                        error!("Request failed with error: {err:?}");
-                                        error_buffer.push_back(data);
-                                        // TODO: Add config for this
-                                        if error_buffer.len() > 1 {
-                                            flush(&checkpoint_path, &error_buffer);
+                                    match response {
+                                        Ok(resp) => {
+                                            debug!("Response: {resp:?}");
+                                        }
+                                        // TODO: Do we skip if network error and insert a delay
+                                        // to avoid spamming when it's probably not going to work
+                                        Err(err) => {
+                                            error!("Request failed with error: {err:?}");
+                                            // Re-add to buffer
+                                            println!("{}", b.buffer.len());
+                                            b.enqueue(data.clone(), false);
+                                            // break;
                                         }
                                     }
                                 }
                             }
+                        }
 
-                            Err(err) => {
-                                error!("Something went wrong with deserialising the payload");
-                                error!("Error: {err}");
-                            }
+                        Err(err) => {
+                            error!("Something went wrong with deserialising the payload");
+                            error!("Error: {err}");
                         }
                     }
-                    p => debug!("Ignoring non-payload message {:?}", p),
-                },
-                Err(err) => {
-                    error!("{err:?}");
-                    std::thread::sleep(Duration::from_secs(5));
-                    break;
                 }
+                p => debug!("Ignoring non-payload message {:?}", p),
+            },
+            Err(err) => {
+                error!("{err:?}");
+                std::thread::sleep(Duration::from_secs(3));
             }
         }
     }

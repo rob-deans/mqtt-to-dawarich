@@ -1,11 +1,9 @@
-use serde::{Deserialize, Serialize};
 use std::env;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Clone)]
 pub struct DawarichConfig {
     pub url: String,
     pub api_key: String,
-
     pub port: u16,
     pub endpoint: String,
 }
