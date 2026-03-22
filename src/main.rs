@@ -118,11 +118,11 @@ fn main() {
     //     .parse()
     //     .expect("BUFFER_SIZE must be a valid number");
 
-    let dawarich_config = dawarich::DawarichConfig::from_env();
+    let mut dawarich = dawarich::Dawarich::from_env();
 
-    let mut b = Buffer::new();
+    // let mut b = Buffer::new();
 
-    let d_client = reqwest::blocking::Client::new();
+    // let d_client = reqwest::blocking::Client::new();
 
     // TODO: Should this go to the buffer then handled in the normal flow?
     if let Some(data) = load_checkpoint(&checkpoint_path) {
@@ -163,10 +163,10 @@ fn main() {
         .parse()
         .expect("MQTT_KEEP_ALIVE_DURATION must be a valid number");
 
-    info!(
-        "Sending data to Dawarich at {}:{}",
-        dawarich_config.endpoint, dawarich_config.port
-    );
+    // info!(
+    //     "Sending data to Dawarich at {}:{}",
+    //     dawarich.endpoint, dawarich.port
+    // );
 
     let client = "mqtt2dawarich-local";
 
@@ -203,33 +203,36 @@ fn main() {
                                 continue;
                             }
 
-                            b.enqueue(data.clone(), true);
-                            // buffer.push_back(data);
+                            dawarich.push_and_try_flush(data);
 
-                            for _ in 0..b.buffer.len() {
-                                if let Some(payload) = b.buffer.pop_front() {
-                                    let response = d_client
-                                        .post(dawarich_config.endpoint.clone())
-                                        .json(&payload)
-                                        .bearer_auth(dawarich_config.api_key.clone())
-                                        .send();
+                            // b.enqueue(data.clone(), true);
+                            // // buffer.push_back(data);
 
-                                    match response {
-                                        Ok(resp) => {
-                                            debug!("Response: {resp:?}");
-                                        }
-                                        // TODO: Do we skip if network error and insert a delay
-                                        // to avoid spamming when it's probably not going to work
-                                        Err(err) => {
-                                            error!("Request failed with error: {err:?}");
-                                            // Re-add to buffer
-                                            println!("{}", b.buffer.len());
-                                            b.enqueue(data.clone(), false);
-                                            // break;
-                                        }
-                                    }
-                                }
-                            }
+                            // for _ in 0..b.buffer.len() {
+                            //     if let Some(payload) = b.buffer.pop_front() {
+                            //         dawarich.push(payload);
+                            //         // let response = d_client
+                            //         //     .post(dawarich.endpoint.clone())
+                            //         //     .json(&payload)
+                            //         //     .bearer_auth(dawarich.api_key.clone())
+                            //         //     .send();
+
+                            //         // match response {
+                            //         //     Ok(resp) => {
+                            //         //         debug!("Response: {resp:?}");
+                            //         //     }
+                            //         //     // TODO: Do we skip if network error and insert a delay
+                            //         //     // to avoid spamming when it's probably not going to work
+                            //         //     Err(err) => {
+                            //         //         error!("Request failed with error: {err:?}");
+                            //         //         // Re-add to buffer
+                            //         //         println!("{}", b.buffer.len());
+                            //         //         b.enqueue(data.clone(), false);
+                            //         //         // break;
+                            //         //     }
+                            //         // }
+                            //     }
+                            // }
                         }
 
                         Err(err) => {
