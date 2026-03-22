@@ -12,9 +12,7 @@ enum ApiStatus {
 #[derive(Debug, Clone)]
 pub struct Dawarich {
     client: reqwest::blocking::Client,
-    url: String,
     api_key: String,
-    port: u16,
     endpoint: String,
     status: ApiStatus,
     concurrent_successes: u16,
@@ -43,22 +41,20 @@ impl Dawarich {
 
         Self {
             client: reqwest::blocking::Client::new(),
-            url: dawarich_base_url,
             api_key: dawarich_api_key,
-            port: dawarich_port,
             endpoint: dawarich_endpoint,
             status: ApiStatus::Healthy,
-            concurrent_successes: 3, // hack
+            concurrent_successes: 0,
             queue: PersistentQueue::new(filepath),
         }
     }
 
-    pub fn push(&mut self, payload: OwntracksPayload) -> bool {
+    pub fn push(&mut self, payload: OwntracksPayload) {
         let response = self
             .client
-            .post(self.endpoint.clone())
+            .post(&self.endpoint)
             .json(&payload)
-            .bearer_auth(self.api_key.clone())
+            .bearer_auth(&self.api_key)
             .send();
 
         match response {
@@ -70,11 +66,7 @@ impl Dawarich {
                 if self.concurrent_successes >= 3 {
                     self.status = ApiStatus::Healthy;
                 }
-
-                true
             }
-            // TODO: Do we skip if network error and insert a delay
-            // to avoid spamming when it's probably not going to work
             Err(err) => {
                 error!("Request failed with error: {err:?}");
                 self.concurrent_successes = 0;
@@ -82,7 +74,6 @@ impl Dawarich {
                 self.status = ApiStatus::Degraded;
 
                 self.queue.push(payload);
-                false
             }
         }
     }
@@ -90,7 +81,7 @@ impl Dawarich {
     /*
      * Push onto payload queue then if the API connection is not degraded, flush
      */
-    pub fn push_and_try_flush(&mut self, payload: OwntracksPayload) {
+    pub fn write(&mut self, payload: OwntracksPayload) {
         self.queue.push(payload);
 
         while let Some(data) = self.queue.pop() {
