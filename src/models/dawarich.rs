@@ -61,7 +61,7 @@ impl Dawarich {
             Ok(resp) => {
                 debug!("Response: {resp:?}");
                 self.concurrent_successes = cmp::min(self.concurrent_successes + 1, u16::MAX - 1);
-                assert!(self.concurrent_successes <= 3);
+                debug_assert!(self.concurrent_successes <= 3);
 
                 if self.concurrent_successes >= 3 {
                     self.status = ApiStatus::Healthy;
