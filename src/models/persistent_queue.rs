@@ -46,10 +46,10 @@ impl PersistentQueue {
 
         if let Ok(json) = serde_json::to_string(&payload) {
             if let Err(e) = writeln!(file, "{json}") {
-                error!("Couldn't write to file {}", e);
+                error!("couldn't write to file {}", e);
             }
         } else {
-            error!("Failed to deserialize payload: {payload:?}")
+            error!("failed to deserialize payload: {payload:?}")
         }
     }
 
@@ -67,10 +67,10 @@ impl PersistentQueue {
             match result {
                 Ok(deserialized) => {
                     if let Err(e) = writeln!(file, "{deserialized}") {
-                        error!("Couldn't write to file {}", e);
+                        error!("couldn't write to file {}", e);
                     }
                 }
-                Err(_) => error!("Failed to deserialize payload: {payload:?}"),
+                Err(_) => error!("failed to deserialize payload: {payload:?}"),
             }
         }
     }
@@ -92,12 +92,12 @@ pub fn load_wal(wal_path: &String) -> VecDeque<OwntracksPayload> {
                         match serde_json::from_str::<OwntracksPayload>(&payload) {
                             Ok(data) => payloads.push_back(data),
                             Err(error) => {
-                                panic!("Failed to serialise checkpointed responses {error}")
+                                panic!("failed to serialise checkpointed responses {error}")
                             }
                         };
                     }
                     Err(e) => {
-                        error!("Failed to load payload: {e}")
+                        error!("failed to load payload: {e}")
                     }
                 }
             }
@@ -111,7 +111,7 @@ pub fn load_wal(wal_path: &String) -> VecDeque<OwntracksPayload> {
                 payloads
             }
             _ => {
-                panic!("something else: {err}")
+                panic!("failed to load wal file {err}")
             }
         },
     }

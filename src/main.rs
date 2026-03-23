@@ -44,7 +44,7 @@ fn main() {
                     mqtt_url, mqtt_port, mqtt_topic
                 );
                 if let Err(err) = client.subscribe(&mqtt_topic, QoS::AtMostOnce) {
-                    error!("Failed to resubscribe! {:?}", err);
+                    error!("failed to resubscribe {:?}", err);
                 }
             }
             Ok(notif) => match notif {
@@ -52,10 +52,7 @@ fn main() {
                     match serde_json::from_slice::<owntracks::OwntracksPayload>(&package.payload) {
                         Ok(data) => {
                             if data._type != "location" {
-                                debug!(
-                                    "Ignoring non-location payload type. Payload was: {:?}",
-                                    data._type
-                                );
+                                debug!("ignoring non-location payload type {:?}", data._type);
                                 continue;
                             }
 

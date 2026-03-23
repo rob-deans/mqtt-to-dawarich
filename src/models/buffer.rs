@@ -45,10 +45,10 @@ impl Buffer {
             match result {
                 Ok(deserialized) => {
                     if let Err(e) = writeln!(file, "{deserialized}") {
-                        error!("Couldn't write to file {}", e);
+                        error!("couldn't write to file {}", e);
                     }
                 }
-                Err(_) => error!("Failed to deserialize payload: {payload:?}"),
+                Err(_) => error!("failed to deserialize payload: {payload:?}"),
             }
         }
     }
