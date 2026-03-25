@@ -1,7 +1,9 @@
 use log::{debug, error, info};
-use std::{cmp, env};
+use std::{cmp, env, path::PathBuf};
 
 use crate::models::{owntracks::OwntracksPayload, persistent_queue::PersistentQueue};
+
+const CONSECUTIVE_SUCCESSES_FOR_HEALTH: u16 = 3;
 
 #[derive(Debug, Clone)]
 enum ApiStatus {
@@ -32,7 +34,9 @@ impl Dawarich {
             "http://{}:{}/api/v1/owntracks/points",
             dawarich_base_url, dawarich_port
         );
-        let filepath = env::var("EVENT_LOG").unwrap_or_else(|_| "checkpoint.ndjson".to_string());
+        let filepath =
+            PathBuf::from(env::var("EVENT_LOG").unwrap_or_else(|_| "checkpoint".to_string()))
+                .with_extension("jsonl");
 
         info!(
             "Sending data to Dawarich at {}:{}",
@@ -55,25 +59,29 @@ impl Dawarich {
             .post(&self.endpoint)
             .json(&payload)
             .bearer_auth(&self.api_key)
-            .send();
+            .send()
+            .and_then(|r| r.error_for_status());
 
         match response {
             Ok(resp) => {
                 debug!("Response: {resp:?}");
-                self.concurrent_successes = cmp::min(self.concurrent_successes + 1, u16::MAX - 1);
-                debug_assert!(self.concurrent_successes <= 3);
+                self.concurrent_successes = cmp::min(
+                    self.concurrent_successes + 1,
+                    CONSECUTIVE_SUCCESSES_FOR_HEALTH,
+                );
+                debug_assert!(self.concurrent_successes <= CONSECUTIVE_SUCCESSES_FOR_HEALTH);
 
-                if self.concurrent_successes >= 3 {
+                if self.concurrent_successes >= CONSECUTIVE_SUCCESSES_FOR_HEALTH {
                     self.status = ApiStatus::Healthy;
                 }
+
+                self.queue.commit_pop();
             }
             Err(err) => {
-                error!("Request failed with error: {err:?}");
+                error!("request failed with error {err:?}");
                 self.concurrent_successes = 0;
-                debug!("Setting status to degraded");
+                debug!("setting status to degraded");
                 self.status = ApiStatus::Degraded;
-
-                self.queue.push(payload);
             }
         }
     }
