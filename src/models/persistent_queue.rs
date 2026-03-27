@@ -6,6 +6,8 @@ use std::{collections::VecDeque, fs::OpenOptions};
 
 use crate::models::owntracks::OwntracksPayload;
 
+const FILE_COMPACT_LINE_THRESHOLD: u16 = 50;
+
 #[derive(Debug, Clone)]
 pub struct PersistentQueue {
     pub filepath: PathBuf,
@@ -32,8 +34,7 @@ impl PersistentQueue {
     }
 
     pub fn push(&mut self, payload: OwntracksPayload) {
-        self.append(&payload);
-        self.queue.push_back(payload);
+        self.append(payload);
         debug!("current queue size: {}", self.queue.len());
     }
 
@@ -47,8 +48,7 @@ impl PersistentQueue {
         self.line_offset += 1;
         debug!("commiting offset {}", self.line_offset);
         self.write_offset();
-        // compact
-        if self.line_offset > 50 {
+        if self.line_offset >= FILE_COMPACT_LINE_THRESHOLD {
             self.compact();
         }
     }
@@ -72,7 +72,7 @@ impl PersistentQueue {
         }
     }
 
-    fn append(&self, payload: &OwntracksPayload) {
+    fn append(&mut self, payload: OwntracksPayload) {
         let mut file = OpenOptions::new()
             .create(true)
             .append(true)
@@ -86,6 +86,7 @@ impl PersistentQueue {
         } else {
             error!("failed to deserialize payload: {payload:?}")
         }
+        self.queue.push_back(payload);
     }
 
     fn commit(&mut self) {
