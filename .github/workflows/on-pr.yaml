@@ -1,0 +1,10 @@
+name: Test On PRs
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    uses: ./.github/workflows/cargo-test.yaml
+
+

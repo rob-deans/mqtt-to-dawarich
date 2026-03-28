@@ -1,18 +1,13 @@
-name: Docker Image CI
+name: Build and Push Docker Image
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - name: 'Login to GitHub Container Registry'
+    - name: Login to GitHub Container Registry
       uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4
       with:
         registry: ghcr.io
