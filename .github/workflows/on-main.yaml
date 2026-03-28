@@ -1,0 +1,12 @@
+name: Build and Push Docker Image on Main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-test-suite:
+    uses: ./.github/workflows/cargo-test.yaml
+  build-and-push:
+    uses: ./.github/workflows/build-and-push.yaml
