@@ -1,0 +1,32 @@
+{"_type": "location", "lat": -79.2, "lon": 166.67, "tst": 1774476783, "bs": 1, "tid": "0000", "alt": 33, "cog": 74, "vel": 2, "vac": 20, "conn": "u", "created_at": 1774476784, "m": 0}
+{"_type": "location", "lat": -86.59, "lon": 0.2, "tst": 1774476784, "bs": 1, "tid": "0001", "_id": "000001", "acc": 11, "alt": 23, "cog": 59, "vel": 3, "batt": 38, "created_at": 1774476785, "m": 2}
+{"_type": "location", "lat": -79.25, "lon": 166.67, "tst": 1774476785, "bs": 1, "tid": "0002", "_id": "000002", "batt": 89, "conn": "u", "created_at": 1774476786, "m": 1}
+{"_type": "location", "lat": -82.06, "lon": 64.12, "tst": 1774476786, "bs": 1, "tid": "0003", "acc": 2, "vac": 23, "batt": 30, "created_at": 1774476787, "m": 3}
+{"_type": "location", "lat": -81.09, "lon": 166.68, "tst": 1774476787, "bs": 1, "tid": "0004", "_id": "000004", "alt": 31, "cog": 57, "conn": "u", "created_at": 1774476788, "m": 2}
+{"_type": "location", "lat": -82.66, "lon": 166.68, "tst": 1774476788, "bs": 1, "tid": "0005", "_id": "000005", "acc": 4, "alt": 8, "cog": 277, "vel": 1, "batt": 90, "created_at": 1774476789, "m": 3}
+{"_type": "location", "lat": -78.66, "lon": 64.13, "tst": 1774476789, "bs": 1, "tid": "0006", "vel": 4, "vac": 19, "batt": 72, "conn": "u", "created_at": 1774476790, "m": 3}
+{"_type": "location", "lat": -83.06, "lon": 64.13, "tst": 1774476790, "bs": 1, "tid": "0007", "_id": "000007", "acc": 7, "batt": 99, "created_at": 1774476791, "m": 1}
+{"_type": "location", "lat": -85.19, "lon": 64.13, "tst": 1774476791, "bs": 1, "tid": "0008", "_id": "000008", "alt": 12, "cog": 263, "conn": "u", "created_at": 1774476792, "m": 0}
+{"_type": "location", "lat": -82.53, "lon": 64.13, "tst": 1774476792, "bs": 1, "tid": "0009", "acc": 4, "alt": 9, "cog": 143, "vac": 16, "batt": 97, "created_at": 1774476793, "m": 0}
+{"_type": "location", "lat": -84.74, "lon": 64.12, "tst": 1774476793, "bs": 1, "tid": "000a", "_id": "000010", "vel": 3, "batt": 86, "conn": "w", "created_at": 1774476794, "m": 2}
+{"_type": "location", "lat": -78.11, "lon": 166.67, "tst": 1774476794, "bs": 1, "tid": "000b", "_id": "000011", "acc": 9, "vel": 1, "batt": 82, "created_at": 1774476795, "m": 3}
+{"_type": "location", "lat": -88.42, "lon": 166.67, "tst": 1774476795, "bs": 1, "tid": "000c", "alt": 21, "cog": 281, "vac": 15, "conn": "w", "created_at": 1774476796, "m": 3}
+{"_type": "location", "lat": -86.15, "lon": 64.12, "tst": 1774476796, "bs": 1, "tid": "000d", "_id": "000013", "acc": 6, "alt": 29, "cog": 298, "batt": 54, "created_at": 1774476797, "m": 2}
+{"_type": "location", "lat": -80.54, "lon": 64.12, "tst": 1774476797, "bs": 1, "tid": "000e", "_id": "000014", "batt": 86, "conn": "w", "created_at": 1774476798, "m": 2}
+{"_type": "location", "lat": -85.66, "lon": 166.67, "tst": 1774476798, "bs": 1, "tid": "000f", "acc": 5, "vel": 1, "vac": 15, "batt": 35, "created_at": 1774476799, "m": 3}
+{"_type": "location", "lat": -87.47, "lon": 166.67, "tst": 1774476799, "bs": 1, "tid": "0010", "_id": "000016", "alt": 33, "cog": 17, "vel": 7, "conn": "u", "created_at": 1774476800, "m": 3}
+{"_type": "location", "lat": -85.18, "lon": 166.67, "tst": 1774476800, "bs": 1, "tid": "0011", "_id": "000017", "acc": 11, "alt": 20, "cog": 232, "batt": 74, "created_at": 1774476801, "m": 3}
+{"_type": "location", "lat": -87.47, "lon": 166.67, "tst": 1774476801, "bs": 1, "tid": "0012", "vac": 19, "batt": 37, "conn": "w", "created_at": 1774476802, "m": 1}
+{"_type": "location", "lat": -89.2, "lon": 64.12, "tst": 1774476802, "bs": 1, "tid": "0013", "_id": "000019", "acc": 13, "batt": 39, "created_at": 1774476803, "m": 3}
+{"_type": "location", "lat": -86.97, "lon": 0.2, "tst": 1774476803, "bs": 1, "tid": "0014", "_id": "000020", "alt": 12, "cog": 289, "vel": 8, "conn": "u", "created_at": 1774476804, "m": 0}
+{"_type": "location", "lat": -84.58, "lon": 64.12, "tst": 1774476804, "bs": 1, "tid": "0015", "acc": 10, "alt": 12, "cog": 15, "vel": 4, "vac": 17, "batt": 97, "created_at": 1774476805, "m": 0}
+{"_type": "location", "lat": -77.99, "lon": 64.12, "tst": 1774476805, "bs": 1, "tid": "0016", "_id": "000022", "batt": 96, "conn": "w", "created_at": 1774476806, "m": 2}
+{"_type": "location", "lat": -79.05, "lon": 64.12, "tst": 1774476806, "bs": 1, "tid": "0017", "_id": "000023", "acc": 15, "batt": 65, "created_at": 1774476807, "m": 0}
+{"_type": "location", "lat": -86.63, "lon": 166.67, "tst": 1774476807, "bs": 1, "tid": "0018", "alt": 5, "cog": 94, "vac": 18, "conn": "w", "created_at": 1774476808, "m": 1}
+{"_type": "location", "lat": -87.32, "lon": 166.68, "tst": 1774476808, "bs": 1, "tid": "0019", "_id": "000025", "acc": 4, "alt": 38, "cog": 138, "vel": 5, "batt": 61, "created_at": 1774476809, "m": 0}
+{"_type": "location", "lat": -80.8, "lon": 166.67, "tst": 1774476809, "bs": 1, "tid": "001a", "_id": "000026", "vel": 4, "batt": 73, "conn": "u", "created_at": 1774476810, "m": 2}
+{"_type": "location", "lat": -82.14, "lon": 64.13, "tst": 1774476810, "bs": 1, "tid": "001b", "acc": 20, "vac": 19, "batt": 88, "created_at": 1774476811, "m": 0}
+{"_type": "location", "lat": -79.85, "lon": 64.13, "tst": 1774476811, "bs": 1, "tid": "001c", "_id": "000028", "alt": 34, "cog": 316, "conn": "u", "created_at": 1774476812, "m": 1}
+{"_type": "location", "lat": -78.96, "lon": 166.67, "tst": 1774476812, "bs": 1, "tid": "001d", "_id": "000029", "acc": 11, "alt": 33, "cog": 162, "batt": 81, "created_at": 1774476813, "m": 0}
+{"_type": "location", "lat": -80.15, "lon": 166.67, "tst": 1774476813, "bs": 1, "tid": "001e", "vel": 4, "vac": 18, "batt": 80, "conn": "u", "created_at": 1774476814, "m": 0}
+{"_type": "location", "lat": -88.86, "lon": 166.68, "tst": 1774476814, "bs": 1, "tid": "001f", "_id": "000031", "acc": 19, "vel": 3, "batt": 26, "created_at": 1774476815, "m": 1}
