@@ -193,13 +193,13 @@ mod tests {
 
     #[test]
     fn offset_file_missing_defaults_to_0() {
-        let result = load_offset("/tmp/.offset".into());
+        let result = load_offset(&PathBuf::from("/tmp/.offset"));
         assert_eq!(result, 0)
     }
 
     #[test]
     fn loads_offset() {
-        let result = load_offset("tests/fixtures/tests.offset".into());
+        let result = load_offset(&PathBuf::from("tests/fixtures/tests.offset"));
         assert_eq!(result, 5)
     }
 
