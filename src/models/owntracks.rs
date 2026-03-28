@@ -65,3 +65,9 @@ pub struct OwntracksPayload {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub topic: Option<String>, // iOS, Android >= 2.4
 }
+
+impl PartialEq for OwntracksPayload {
+    fn eq(&self, other: &Self) -> bool {
+        self._id == other._id
+    }
+}
