@@ -11,4 +11,7 @@ services:
       MQTT_TOPIC: owntracks
       DAWARICH_BASE_URL: 192.168.1.10
       DAWARICH_API_KEY: <APIKEY>
+      EVENT_LOG: /data/checkpoint
+    volumes:
+      - ./data:/data
 
