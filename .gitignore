@@ -1,1 +1,4 @@
 /target
+checkpoint.ndjson
+checkpoint.jsonl
+.offset
